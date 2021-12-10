@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Changes in the racial composition of census tracts 2010-2020</title>
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css"/>
+	<link rel="stylesheet" href="https://github.com/ismyrnow/leaflet-groupedlayercontrol/tree/gh-pages/dist/leaflet.groupedlayercontrol.min.css"/>
+<style> 
+html { height:100%;}
+    body {
+        height:100%;
+        padding: 0;
+        margin: 0;
+    }
+
+    #map {
+        width: 100%;
+        margin: 0 auto;
+        height: 95%;
+    }
+
+
+       .info h1 {
+        font-size:  16px;
+        margin:  0 0 5px;
+        color:  #777777;
+    }
+    .legend {
+        line-height: 18px;
+        color: #333333;
+        font-family: 'Open Sans', Helvetica, sans-serif;
+        padding: 6px 8px;
+        background: white;
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 5px;
+        opacity: 1;
+    }
+.legend i {
+    width: 30px;
+    height: 18px;
+    float: left;
+    margin-right: 8px;
+    opacity: 1;
+
+}
+
+.legend p{
+    font-size: 12px;
+    line-height: 18px;
+    margin: 0;
+
+}
+
+.header {
+  padding: 1px;
+  text-align: center;
+  background: #1abc9c;
+  color: white;
+  font-size: 9px;
+}
+
+/*h1{
+    color: black;
+    font-family: sans-serif;
+    font-size: 300%;
+    font-stretch: expanded;
+    font-weight: 900;
+    text-align: center;
+}*/
+
+   </style>
+
+
+</head>
+<body>
+	<script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet.js">
+	</script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js">
+    </script>
+    <script src="https://rawgithub.com/ismyrnow/Leaflet.groupedlayercontrol/master/src/leaflet.groupedlayercontrol.js">
+    </script>
+    <script src="https://github.com/ismyrnow/leaflet-groupedlayercontrol/blob/gh-pages/dist/leaflet.groupedlayercontrol.min.js.map"></script>
+
+
+ <div class="header">
+  <h1>Changes in Racial Composition of Philadelphia Census Tracts <br> (2010 - 2020)</h1>
+</div>
+
+
+    <div id="map" style="width: 1000px; height: 600px">
+    </div>
+
+
+
+    <script>
+var map = L.map('map', {center: [39.978251, -75.129854], zoom: 11.3});
+
+
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { attribution: '© OpenStreetMap' }).addTo(map);
+        
+        var mbAttr = 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, ' +
+                'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+            mbUrl = 'https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw';
+            
+        var grayscale   = L.tileLayer(mbUrl, {id: 'mapbox/light-v9', tileSize: 512, zoomOffset: -1, attribution: mbAttr}).addTo(map),
+            streets  = L.tileLayer(mbUrl, {id: 'mapbox/streets-v11', tileSize: 512, zoomOffset: -1, attribution: mbAttr});
+            
+ var baseMaps = {
+    "grayscale": grayscale,
+    "streets": streets
+};
+
+
+function setColorFuncWht(density){
+   return  density > 35  ? '#005a32' :
+           density > 25  ? '#238b45' :
+           density > 15  ? '#41ab5d' :
+           density > 10  ? '#74c476' :
+           density > 5   ? '#a1d99b' :
+           density > 2   ? '#c7e9c0' :
+           density > (-2)  ? '#ffffff00' :
+           density > (-5)  ? '#d9d9d9' :
+           density > (-10) ? '#bdbdbd' :
+           density > (-15) ? '#969696' :
+           density > (-25) ? '#737373' :
+           density > (-35) ? '#525252' :
+           density < (-35) ? '#252525' :
+                             '#ffffff00'
+	};
+
+function setColorFuncBlk(density){
+   return  density > 35  ? '#084594' :
+           density > 25  ? '#2171b5' :
+           density > 15  ? '#4292c6' :
+           density > 10  ? '#6baed6' :
+           density > 5   ? '#9ecae1' :
+           density > 2   ? '#c6dbef' :
+           density > (-2)  ? '#ffffff00 '       :
+           density > (-5)  ? '#d9d9d9' :
+           density > (-10) ? '#bdbdbd' :
+           density > (-15) ? '#969696' :
+           density > (-25) ? '#737373' :
+           density > (-35) ? '#525252' :
+           density < (-35) ? '#252525' :
+                             '#ffffff00'
+	};
+
+	function setColorFuncAsn(density){
+   return  density > 35  ? '#99000d' :
+           density > 25  ? '#cb181d' :
+           density > 15  ? '#ef3b2c' :
+           density > 10  ? '#fb6a4a' :
+           density > 5   ? '#fc9272' :
+           density > 2   ? '#fcbba1' :
+           density > (-2)  ? '#ffffff00 ':
+           density > (-5)  ? '#d9d9d9' :
+           density > (-10) ? '#bdbdbd' :
+           density > (-15) ? '#969696' :
+           density > (-25) ? '#737373' :
+           density > (-35) ? '#525252' :
+           density < (-35) ? '#252525' :
+                             '#ffffff00'
+	};
+
+function setColorFuncHsp(density){
+   return  density > 35  ? '#8c2d04' :
+           density > 25  ? '#d94801' :
+           density > 15  ? '#f16913' :
+           density > 10  ? '#fd8d3c' :
+           density > 5   ? '#fdae6b' :
+           density > 2   ? '#fdd0a2' :
+           density > (-2)  ? '#ffffff00'       :
+           density > (-5)  ? '#d9d9d9' :
+           density > (-10) ? '#bdbdbd' :
+           density > (-15) ? '#969696' :
+           density > (-25) ? '#737373' :
+           density > (-35) ? '#525252' :
+           density < (-35) ? '#252525' :
+                             '#ffffff00'
+	};
+
+
+
+// L.Control.textbox = L.Control.extend({
+// 		onAdd: function(map) {
+			
+// 		var text = L.DomUtil.create('div', 'textbox');
+// 		text.id = "info_text";
+// 		text.innerHTML = "<strong> Changes in Racial Composition of Philadelphia Census Tracts <br> (2010 - 2020)</strong>"
+// 		return text;
+// 		},
+
+// 		onRemove: function(map) {
+// 			// Nothing to do here
+// 		}
+// 	});
+// 	L.control.textbox = function(opts) { return new L.Control.textbox(opts);}
+// 	L.control.textbox({ position: 'topleft' }).addTo(map);
+
+
+
+ var wht_legend = L.control({position: 'bottomright'});
+
+        wht_legend.onAdd = function (map) {
+             var div = L.DomUtil.create('div', 'legend');            
+    div.innerHTML += '<b>Change in % of white residents <br>as share of total population </b><br />';
+    div.innerHTML += 'by census tract<br />';
+    div.innerHTML += '<br>';
+    div.innerHTML += '<i style="background: #005a32"></i><p>over 35 point change</p>';
+    div.innerHTML += '<i style="background: #238B45"></i><p>25 - 35 point change</p>';
+    div.innerHTML += '<i style="background: #41ab5d"></i><p>15 - 25 point change</p>';
+    div.innerHTML += '<i style="background: #74c476"></i><p>10 - 15 point change</p>';
+	div.innerHTML += '<i style="background: #a1d99b"></i><p>5 - 10 point change</p>';
+	div.innerHTML += '<i style="background: #c7e9c0"></i><p>2 - 5 point change</p>';
+	div.innerHTML += '<i style="background: #ffffff00"></i><p>-2 - 2 point change</p>';
+	div.innerHTML += '<i style="background: #d9d9d9"></i><p>-5 - -2 point change</p>';
+	div.innerHTML += '<i style="background: #bdbdbd"></i><p>-10 - -5 point change</p>';
+	div.innerHTML += '<i style="background: #969696"></i><p>-15 - -10 point change</p>';
+	div.innerHTML += '<i style="background: #737373"></i><p>-25 - -15 point change</p>';
+	div.innerHTML += '<i style="background: #525252"></i><p>-35 - -25 point change</p>';
+	div.innerHTML += '<i style="background: #252525"></i><p>over -35 point change</p>';
+
+
+
+
+
+
+    div.innerHTML += '<hr>';
+    div.innerHTML += '<i style="background: "></i><p>No Data</p>';
+    return div;
+};
+
+
+
+
+var blk_legend = L.control({position: 'bottomright'});
+
+        blk_legend.onAdd = function (map) {
+             var div1 = L.DomUtil.create('div', 'legend');            
+    div1.innerHTML += '<b>Change in % of black residents <br>as share of total population </b><br />';
+    div1.innerHTML += 'by census tract<br />';
+    div1.innerHTML += '<br>';
+    div1.innerHTML += '<i style="background: #084594"></i><p>over 35 point change</p>';
+    div1.innerHTML += '<i style="background: #2171b5"></i><p>25 - 35 point change</p>';
+    div1.innerHTML += '<i style="background: #4292c6"></i><p>15 - 25 point change</p>';
+    div1.innerHTML += '<i style="background: #6baed6"></i><p>10 - 15 point change</p>';
+	div1.innerHTML += '<i style="background: #9ecae1"></i><p>5 - 10 point change</p>';
+	div1.innerHTML += '<i style="background: #c6dbef"></i><p>2 - 5 point change</p>';
+	div1.innerHTML += '<i style="background: #ffffff00"></i><p>-2 - 2 point change</p>';
+	div1.innerHTML += '<i style="background: #d9d9d9"></i><p>-5 - -2 point change</p>';
+	div1.innerHTML += '<i style="background: #bdbdbd"></i><p>-10 - -5 point change</p>';
+	div1.innerHTML += '<i style="background: #969696"></i><p>-15 - -10 point change</p>';
+	div1.innerHTML += '<i style="background: #737373"></i><p>-25 - -15 point change</p>';
+	div1.innerHTML += '<i style="background: #525252"></i><p>-35 - -25 point change</p>';
+	div1.innerHTML += '<i style="background: #252525"></i><p>over -35 point change</p>';
+
+
+
+
+
+
+    div1.innerHTML += '<hr>';
+    div1.innerHTML += '<i style="background: "></i><p>No Data</p>';
+    return div1;
+};
+
+// blk_legend.addTo(map);
+
+
+var asn_legend = L.control({position: 'bottomright'});
+
+        asn_legend.onAdd = function (map) {
+             var div2 = L.DomUtil.create('div', 'legend');            
+    div2.innerHTML += '<b>Change in % of asian residents <br>as share of total population </b><br />';
+    div2.innerHTML += 'by census tract<br />';
+    div2.innerHTML += '<br>';
+    div2.innerHTML += '<i style="background: #99000d"></i><p>over 35 point change</p>';
+    div2.innerHTML += '<i style="background: #cb181d"></i><p>25 - 35 point change</p>';
+    div2.innerHTML += '<i style="background: #ef3b2c"></i><p>15 - 25 point change</p>';
+    div2.innerHTML += '<i style="background: #fb6a4a"></i><p>10 - 15 point change</p>';
+	div2.innerHTML += '<i style="background: #fc9272"></i><p>5 - 10 point change</p>';
+	div2.innerHTML += '<i style="background: #fcbba1"></i><p>2 - 5 point change</p>';
+	div2.innerHTML += '<i style="background: #ffffff00"></i><p>-2 - 2 point change</p>';
+	div2.innerHTML += '<i style="background: #d9d9d9"></i><p>-5 - -2 point change</p>';
+	div2.innerHTML += '<i style="background: #bdbdbd"></i><p>-10 - -5 point change</p>';
+	div2.innerHTML += '<i style="background: #969696"></i><p>-15 - -10 point change</p>';
+	div2.innerHTML += '<i style="background: #737373"></i><p>-25 - -15 point change</p>';
+	div2.innerHTML += '<i style="background: #525252"></i><p>-35 - -25 point change</p>';
+	div2.innerHTML += '<i style="background: #252525"></i><p>over -35 point change</p>';
+
+
+
+
+
+
+    div2.innerHTML += '<hr>';
+    div2.innerHTML += '<i style="background: "></i><p>No Data</p>';
+    return div2;
+};
+
+ // asn_legend.addTo(map);
+
+ var hisp_legend = L.control({position: 'bottomright'});
+
+        hisp_legend.onAdd = function (map) {
+             var div3 = L.DomUtil.create('div', 'legend');            
+    div3.innerHTML += '<b>Change in % of hispanic residents <br>as share of total population </b><br />';
+    div3.innerHTML += 'by census tract<br />';
+    div3.innerHTML += '<br>';
+    div3.innerHTML += '<i style="background: #8c2d04"></i><p>over 35 point change</p>';
+    div3.innerHTML += '<i style="background: #d94801"></i><p>25 - 35 point change</p>';
+    div3.innerHTML += '<i style="background: #f16913"></i><p>15 - 25 point change</p>';
+    div3.innerHTML += '<i style="background: #fd8d3c"></i><p>10 - 15 point change</p>';
+	div3.innerHTML += '<i style="background: #fdae6b"></i><p>5 - 10 point change</p>';
+	div3.innerHTML += '<i style="background: #fdd0a2"></i><p>2 - 5 point change</p>';
+	div3.innerHTML += '<i style="background: #ffffff00"></i><p>-2 - 2 point change</p>';
+	div3.innerHTML += '<i style="background: #d9d9d9"></i><p>-5 - -2 point change</p>';
+	div3.innerHTML += '<i style="background: #bdbdbd"></i><p>-10 - -5 point change</p>';
+	div3.innerHTML += '<i style="background: #969696"></i><p>-15 - -10 point change</p>';
+	div3.innerHTML += '<i style="background: #737373"></i><p>-25 - -15 point change</p>';
+	div3.innerHTML += '<i style="background: #525252"></i><p>-35 - -25 point change</p>';
+	div3.innerHTML += '<i style="background: #252525"></i><p>over -35 point change</p>';
+
+
+
+
+
+
+    div3.innerHTML += '<hr>';
+    div3.innerHTML += '<i style="background: "></i><p>No Data</p>';
+    return div3;
+};
+
+ // hisp_legend.addTo(map);
+
+
+
+
+
+
+
+
+
+
+
+function styleFunc3(feature) {
+    return {
+        fillColor: setColorFuncHsp(feature.properties.perc_chg_hisp),
+        fillOpacity: 0.9,
+        weight: 1,
+        opacity: .1,
+        color: '#ffffff',
+        dashArray: '3'
+    };
+}
+
+function styleFunc2(feature) {
+    return {
+        fillColor: setColorFuncAsn(feature.properties.perc_chg_asian),
+        fillOpacity: 0.9,
+        weight: 1,
+        opacity: .1,
+        color: '#ffffff',
+        dashArray: '3'
+    };
+}
+
+	function styleFunc1(feature) {
+    return {
+        fillColor: setColorFuncBlk(feature.properties.perc_chg_black),
+        fillOpacity: 0.9,
+        weight: 1,
+        opacity: .1,
+        color: '#ffffff',
+        dashArray: '3'
+    };
+}
+
+
+
+function styleFunc(feature) {
+    return {
+        fillColor: setColorFuncWht(feature.properties.perc_chg_white),
+        fillOpacity: 0.9,
+        weight: 1,
+        opacity: .1,
+        color: '#ffffff',
+        dashArray: '3'
+    };
+}
+
+
+var tract_layer = null;
+var tract_layer1 = null;
+var tract_layer2 = null;
+var tract_layer3 = null;
+$.getJSON("final_ready5.geojson",function(data){
+    tract_layer = L.geoJson(data, {
+        style: styleFunc,
+        onEachFeature: function(feature, layer){
+            // layer.bindPopup('change in % share of population: '+feature.properties.perc_chg_white);
+            layer.bindPopup('2010: '+feature.properties.perc_wht_old +'% <br> 2020: '+feature.properties.perc_wht_new +'%');
+        }
+    });
+
+	 tract_layer1 = L.geoJson(data,{
+		style: styleFunc1,
+		onEachFeature: function(feature, layer){
+			layer.bindPopup('2010: '+feature.properties.perc_blk_old +'% <br> 2020: '+feature.properties.perc_blk_new +'%');
+		}
+	})
+
+	 tract_layer2 = L.geoJson(data,{
+		style: styleFunc2,
+		onEachFeature: function(feature, layer){
+			layer.bindPopup('2010: '+feature.properties.perc_asn_old +'% <br> 2020: '+feature.properties.perc_asn_new +'%');
+		}
+	})
+
+	 tract_layer3 = L.geoJson(data, {
+		style: styleFunc3,
+		onEachFeature: function(feature, layer){
+			layer.bindPopup('2010: '+feature.properties.perc_hsp_old +'% <br> 2020: '+feature.properties.perc_hisp_new +'%');
+		}
+	})
+
+	 var overlaylayers = {
+	 	"White": tract_layer,
+	 	"Black" : tract_layer1,
+	 	"Asian" : tract_layer2,
+	 	"Hispanic": tract_layer3
+	 };
+
+	  L.control.layers(baseMaps, overlaylayers).addTo(map);
+});
+
+
+
+
+function removeWithTimeout(layer) {
+  setTimeout(function() {
+    map.removeLayer(layer);
+  }, 10);
+}
+
+map.on('overlayadd', function(event)
+{
+  console.log( "Clicked on " + event.name )
+  if ( event.name == "White" && map.hasLayer(tract_layer1) ) {
+    console.log("remove Black");
+    removeWithTimeout(tract_layer1);
+  }
+  if ( event.name == "White" && map.hasLayer(tract_layer2) ) {
+    console.log("remove Asian");
+    removeWithTimeout(tract_layer2);
+  }
+
+  console.log( "Clicked on " + event.name )
+  if ( event.name == "White" && map.hasLayer(tract_layer3) ) {
+    console.log("remove Hispanic");
+    removeWithTimeout(tract_layer3);
+  }
+
+  console.log( "Clicked on " + event.name )
+  if ( event.name == "Black" && map.hasLayer(tract_layer) ) {
+    console.log("remove White");
+    removeWithTimeout(tract_layer);
+  }
+
+  console.log( "Clicked on " + event.name )
+  if ( event.name == "Black" && map.hasLayer(tract_layer2) ) {
+    console.log("remove Asian");
+    removeWithTimeout(tract_layer2);
+  }
+console.log( "Clicked on " + event.name )
+  if ( event.name == "Black" && map.hasLayer(tract_layer3) ) {
+    console.log("remove Hispanic");
+    removeWithTimeout(tract_layer3);
+  }
+
+  console.log( "Clicked on " + event.name )
+  if ( event.name == "Asian" && map.hasLayer(tract_layer) ) {
+    console.log("remove White");
+    removeWithTimeout(tract_layer);
+  }
+
+  console.log( "Clicked on " + event.name )
+  if ( event.name == "Asian" && map.hasLayer(tract_layer1) ) {
+    console.log("remove Black");
+    removeWithTimeout(tract_layer1);
+  }
+
+  console.log( "Clicked on " + event.name )
+  if ( event.name == "Asian" && map.hasLayer(tract_layer3) ) {
+    console.log("remove Hispanic");
+    removeWithTimeout(tract_layer3);
+  }
+
+  console.log( "Clicked on " + event.name )
+  if ( event.name == "Hispanic" && map.hasLayer(tract_layer) ) {
+    console.log("remove White");
+    removeWithTimeout(tract_layer);
+  }
+
+  console.log( "Clicked on " + event.name )
+  if ( event.name == "Hispanic" && map.hasLayer(tract_layer1) ) {
+    console.log("remove Black");
+    removeWithTimeout(tract_layer1);
+  }
+console.log( "Clicked on " + event.name )
+  if ( event.name == "Hispanic" && map.hasLayer(tract_layer2) ) {
+    console.log("remove Asian");
+    removeWithTimeout(tract_layer2);
+  }
+
+});
+
+
+
+
+
+var layerToLegendMapping={
+  "White": wht_legend,
+  "Black": blk_legend,
+  "Asian": asn_legend,
+  "Hispanic": hisp_legend
+}
+function legendAdd(event) {
+  var layername = event.name;
+  map.addControl(layerToLegendMapping[layername]);
+}
+function legendRemove(event) {
+  var layername = event.name;
+  map.removeControl(layerToLegendMapping[layername]);
+}
+map.on('overlayadd',legendAdd);
+map.on('overlayremove',legendRemove);
+    </script>
+
+
+</body>
+</html>
